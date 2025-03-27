@@ -70,7 +70,7 @@ public class PlantService {
         return result;
     }
 
-    // Upload plant images with no size limit
+    // Upload plant images with no size limitn
     public String uploadImage(MultipartFile file, String description) throws IOException {
         if (file.isEmpty()) {
             return "empty";
