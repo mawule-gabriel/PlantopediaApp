@@ -38,8 +38,8 @@ jobs:
       - name: Build, tag, and push Docker image to Amazon ECR
         id: image
         env:
-          ECR_REGISTRY: public.ecr.aws/g7n2o3k3
-          ECR_REPOSITORY: project-2
+          ECR_REGISTRY: public.ecr.aws/j1n7u2e7
+          ECR_REPOSITORY: plantrepo
           IMAGE_TAG: latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest  .
