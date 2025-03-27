@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plantopedia Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1B5E20; /* Deep Fern Green */
+            --secondary-color: #76FF03; /* Lime Green */
+            --accent-color: #FF5722; /* Vibrant Orange */
+            --background-color: #F9FAFB; /* Soft Off-White */
+            --card-color: #FFFFFF; /* White */
+            --text-color: #212121; /* Dark Slate */
+            --text-secondary: #757575; /* Gray */
+            --border-color: #E0E0E0; /* Light Gray */
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        header {
+            background-color: var(--card-color);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--box-shadow);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            transform: translateY(-2px);
+        }
+
+        .upload-btn i {
+            margin-right: 8px;
+        }
+
+        main {
+            flex: 1;
+            padding: 30px 0;
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .image-card {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            padding-top: 75%; /* 4:3 Aspect Ratio */
+        }
+
+        .image-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .image-card:hover .image-container img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .image-description {
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .image-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px 15px;
+        }
+
+        .image-button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .view-button {
+            color: var(--primary-color);
+        }
+
+        .view-button:hover {
+            background-color: rgba(27, 94, 32, 0.1);
+        }
+
+        .delete-button {
+            color: #D32F2F;
+        }
+
+        .delete-button:hover {
+            background-color: rgba(211, 47, 47, 0.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .pagination a {
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .pagination a:hover, .pagination a.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1010;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .zoom-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+            display: flex;
+        }
+
+        .zoom-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .zoom-img {
+            max-width: 100%;
+            max-height: 90vh;
+            display: block;
+            border-radius: 4px;
+            object-fit: contain;
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            transition: var(--transition);
+        }
+
+        .zoom-close:hover {
+            color: #D32F2F;
+        }
+
+        .image-caption {
+            color: white;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background-color: #D32F2F;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery-container {
+                grid-template-columns: 1fr;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>Plantopedia</span>
+            </div>
+            <button class="upload-btn" id="upload-btn">
+                <i class="fas fa-upload"></i>
+                Upload Plant
+            </button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <div class="gallery-container" id="gallery-container">
+            <div th:each="plant : ${images}" class="image-card">
+                <div class="image-container">
+                    <img th:src="${plant.key}" alt="Plant Image" loading="lazy"/>
+                </div>
+                <div class="image-info">
+                    <div class="image-description" th:text="${plant.value}"></div>
+                </div>
+                <div class="image-actions">
+                    <button class="image-button view-button"
+                            th:data-key="${plant.key}"
+                            th:data-value="${plant.value}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="image-button delete-button"
+                            th:data-key="${plant.key}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:href="@{/(page=${currentPage - 1}, size=${pageSize})}" th:if="${currentPage > 0}">Previous</a>
+            <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+               th:href="@{/(page=${i}, size=${pageSize})}"
+               th:text="${i + 1}"
+               th:classappend="${currentPage == i} ? 'active' : ''"></a>
+            <a th:href="@{/(page=${currentPage + 1}, size=${pageSize})}" th:if="${hasNextPage}">Next</a>
+        </div>
+    </div>
+</main>
+
+<div id="zoom-modal" class="zoom-modal">
+    <div class="zoom-content">
+        <button class="zoom-close" id="close-zoom">×</button>
+        <img id="zoom-img" class="zoom-img"/>
+        <div id="image-caption" class="image-caption"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <i id="toast-icon" class="fas fa-check-circle"></i>
+    <span id="toast-message"></span>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const uploadBtn = document.getElementById('upload-btn');
+        const zoomModal = document.getElementById('zoom-modal');
+        const closeZoom = document.getElementById('close-zoom');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+
+        uploadBtn.addEventListener('click', () => {
+            window.location.href = '/upload';
+        });
+
+        // Attach event listeners to view buttons
+        document.querySelectorAll('.view-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const key = button.getAttribute('data-key');
+                const value = button.getAttribute('data-value');
+                viewImage(key, value);
+            });
+        });
+
+        // Attach event listeners to delete buttons
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const key = button.getAttribute('data-key');
+                deleteImage(key);
+            });
+        });
+
+        function viewImage(url, description) {
+            document.getElementById('zoom-img').src = url;
+            document.getElementById('image-caption').textContent = description;
+            zoomModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        closeZoom.addEventListener('click', () => {
+            zoomModal.classList.remove('show');
+            document.body.style.overflow = '';
+        });
+
+        zoomModal.addEventListener('click', (e) => {
+            if (e.target === zoomModal) {
+                zoomModal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        });
+
+        function deleteImage(imageKey) {
+            if (confirm('Are you sure you want to delete this plant?')) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/delete';
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'imageKey';
+                input.value = imageKey.substring(imageKey.lastIndexOf('/') + 1).split('?')[0];
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+                showToast('Plant deleted successfully');
+            }
+        }
+
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            toastIcon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+            toast.className = isError ? 'toast error show' : 'toast show';
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && zoomModal.classList.contains('show')) {
+                zoomModal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Plant - Plantopedia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1B5E20; /* Deep Fern Green */
+            --secondary-color: #76FF03; /* Lime Green */
+            --accent-color: #FF5722; /* Vibrant Orange */
+            --background-color: #F9FAFB; /* Soft Off-White */
+            --card-color: #FFFFFF; /* White */
+            --text-color: #212121; /* Dark Slate */
+            --text-secondary: #757575; /* Gray */
+            --border-color: #E0E0E0; /* Light Gray */
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: var(--card-color);
+            max-width: 500px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            position: relative;
+            padding: 20px;
+        }
+
+        .modal-header {
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: #D32F2F;
+        }
+
+        .modal-body {
+            padding: 20px 0;
+        }
+
+        .alert {
+            background: rgba(211, 47, 47, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #D32F2F;
+            color: #D32F2F;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: var(--transition);
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2);
+            outline: none;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            text-align: center;
+            border: 2px dashed var(--border-color);
+            padding: 20px;
+            border-radius: 4px;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        .image-preview.active {
+            border-color: var(--secondary-color);
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .drop-message {
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .drop-icon {
+            font-size: 2rem;
+            color: var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .modal-footer {
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary {
+            background-color: #E9ECEF;
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #DEE2E6;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: var(--box-shadow);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background-color: #D32F2F;
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                margin: 20px;
+                width: calc(100% - 40px);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="modal-content">
+    <div class="modal-header">
+        <h3 class="modal-title">Upload New Plant</h3>
+        <a href="/" class="modal-close">&times;</a>
+    </div>
+    <div class="modal-body">
+        <div th:if="${message}" class="alert" role="alert">
+            <p th:text="${message}"></p>
+        </div>
+
+        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="images">Plant Image</label>
+                <div class="image-preview" id="image-preview">
+                    <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                    <p class="drop-message">Drag & drop an image or click to select</p>
+                    <img id="preview-image" class="preview-image">
+                    <input type="file" id="images" name="images" accept="image/*" style="display:none;" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" placeholder="Describe the plant..." required></textarea>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="/" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary" id="submit-upload">Upload</button>
+    </div>
+</div>
+
+<div class="toast" id="toast">
+    <i id="toast-icon" class="fas fa-check-circle"></i>
+    <span id="toast-message"></span>
+</div>
+
+<script>
+    const imagePreview = document.getElementById('image-preview');
+    const previewImage = document.getElementById('preview-image');
+    const imageUpload = document.getElementById('images');
+    const submitUpload = document.getElementById('submit-upload');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+
+    imagePreview.addEventListener('click', () => {
+        imageUpload.click();
+    });
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        imagePreview.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        imagePreview.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        imagePreview.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        imagePreview.classList.add('active');
+    }
+
+    function unhighlight() {
+        imagePreview.classList.remove('active');
+    }
+
+    imagePreview.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) handleFiles(files);
+    }
+
+    imageUpload.addEventListener('change', function() {
+        if (this.files.length) handleFiles(this.files);
+    });
+
+    function handleFiles(files) {
+        const file = files[0];
+        if (!file.type.match('image.*')) {
+            showToast('Only image files are allowed', true);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+            imagePreview.classList.add('active');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    submitUpload.addEventListener('click', () => {
+        const form = document.getElementById('upload-form');
+        if (previewImage.style.display === 'none') {
+            showToast('Please select an image', true);
+            return;
+        }
+        if (!document.getElementById('description').value) {
+            showToast('Please enter a description', true);
+            return;
+        }
+        form.submit();
+        showToast('Uploading plant...');
+    });
+
+    function showToast(message, isError = false) {
+        toastMessage.textContent = message;
+        toastIcon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+        toast.className = isError ? 'toast error show' : 'toast show';
+        setTimeout(() => {
+            toast.className = toast.className.replace('show', '');
+        }, 3000);
+    }
+</script>
+</body>
+</html>
